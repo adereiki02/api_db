@@ -166,7 +166,3 @@ mysqldump -u username -p nama_database > nama_file_dump.sql
 - Restore
 mysql -u username -p nama_database < nama_file_dump.sql
 
-
-KIRIM EMAIL :
-Subject = Tugas BK 2023
-ramadhan_rs@dsn.dinus.ac.id
