@@ -1,0 +1,172 @@
+**Deklarasi Tabel**
+- Konsumen
+CREATE TABLE konsumen (
+Kd_konsumen char(5) primary key,
+Nm_konsumen varchar(25),
+alamat varchar(25),
+kelamin char(1),
+kota varchar(15)
+);
+
+- Barang
+CREATE TABLE barang (
+Kd_barang char(3) primary key,
+Nm_barang varchar(25),
+Ukuran char(5),
+Hrg_brg int,
+stok char(3)
+);
+
+- Penjualan
+CREATE TABLE penjualan (
+no_nota char(4) primary key,
+tgl date,
+Kd_konsumen char(5),
+FOREIGN KEY (Kd_konsumen) REFERENCES konsumen(Kd_konsumen),
+Total int(15)
+);
+
+//menambahkan foreign key ke kd_konsumen
+ALTER TABLE penjualan ADD FOREIGN KEY (Kd_konsumen) REFERENCES konsumen(kd_konsumen);
+
+- Detail Penjualan
+CREATE TABLE dtlpenjualan (
+no_nota char(4) ,
+Kd_barang char(3),
+jml int,
+diskon int,
+Hrg_jual int
+);
+
+**Stored Procedure
+
+//Deklarasi Store Procedure Data Konsumen
+DELIMITER $$
+ 
+CREATE PROCEDURE isi_konsumen(
+	IN a char(5),
+	IN b varchar(25),
+	IN c varchar(25),
+	IN d char(1),
+	IN e varchar(15)
+)
+BEGIN
+    INSERT INTO konsumen (Kd_konsumen, Nm_konsumen, alamat, kelamin, kota)
+    VALUES (a, b, c, d, e);
+	SELECT * FROM konsumen;
+END$$
+
+DELIMITER ;
+
+//Deklarasi Store Procedure Data Barang
+DELIMITER $$
+ 
+CREATE PROCEDURE isi_barang(
+	IN a char(3),
+	IN b varchar(25),
+	IN c char(5),
+	IN d int(11),
+	IN e char(3)
+)
+BEGIN
+    INSERT INTO barang (Kd_barang, Nm_barang, Ukuran, Hrg_brg, stok)
+    VALUES (a, b, c, d, e);
+    SELECT * FROM barang;
+END$$
+
+DELIMITER ;
+
+//Deklarasi Store Procedure Data Penjualan
+DELIMITER $$
+ 
+CREATE PROCEDURE isi_penjualan(
+	IN a char(4),
+	IN b date,
+	IN c char(5),
+	IN d int(15)
+)
+BEGIN
+    INSERT INTO penjualan (no_nota, tgl, Kd_konsumen, Total)
+    VALUES (a, b, c, d);
+END$$
+
+DELIMITER ;
+
+//Deklarasi Store Procedure Data Detail Penjualan
+DELIMITER $$
+ 
+CREATE PROCEDURE isi_dtlpenjualan(
+	IN a char(4),
+	IN b char(3),
+	IN c int(11),
+	IN d int(11),
+	IN e int(11)
+)
+BEGIN
+    INSERT INTO dtlpenjualan (no_nota, Kd_barang, jml, diskon, Hrg_jual)
+    VALUES (a, b, c, d, e);
+END$$
+
+DELIMITER ;
+
+//Masukkan data konsumen
+CALL isi_konsumen('LSP01','Arina Wati','Jl. Belimbing 3','P','Semarang');
+CALL isi_konsumen('LSP02','Joko Suyono','Jl. Parkit 5','L','Salatiga');
+CALL isi_konsumen('LSP03','Melinda','Jl. Gaharu Raya','P','Kendal');
+
+//Masukkan data penjualan dan detail penjualan *call*
+CALL isi_penjualan('TR01','2022-07-20','LSP02',27000);
+CALL isi_penjualan('TR02','2022-07-21','LSP01',73000);
+
+CALL isi_dtlpenjualan('TR01','A01',1,2000,22000);
+CALL isi_dtlpenjualan('TR01','A02',1,0,5000);
+CALL isi_dtlpenjualan('TR02','A03',1,0,73000);
+
+//Masukkan data penjualan dan detail penjualan *manual*
+INSERT INTO penjualan VALUES
+('TR01','2022-07-20','LSP02',27000), ('TR02','2022-07-21','LSP01',73000);
+
+INSERT INTO dtlpenjualan VALUES
+('TR01','A01',1,2000,22000),
+('TR01','A02',1,0,5000),
+('TR02','A03',1,0,73000);
+
+//Masukkan data barang
+CALL isi_barang('A01','Cat Avian 1kg','Kg',24000,25);
+CALL isi_barang('A02','Kuas Kecil','buah',5000,20);
+CALL isi_barang('A03','Semen 50kg','sak',73000,10);
+
+//Menampilkan data barang yang dibeli oleh konsumen LSP02
+SELECT konsumen.Kd_konsumen, konsumen.Nm_konsumen, konsumen.alamat, konsumen.kota, dtlpenjualan.Kd_barang
+FROM konsumen, penjualan, dtlpenjualan
+WHERE konsumen.Kd_konsumen = penjualan.Kd_konsumen
+AND dtlpenjualan.no_nota = penjualan.no_nota
+AND penjualan.Kd_konsumen = 'LSP02';
+
+//Trigger untuk mengurangi stok barang ketika ada transaksi penjualan
+DELIMITER $$
+
+CREATE TRIGGER hpsbarang AFTER INSERT
+ON dtlpenjualan
+FOR EACH ROW
+BEGIN
+	UPDATE barang SET stok=stok-1
+	WHERE Kd_barang=new.Kd_barang;
+END$$
+
+
+//Memulai transaction dan menambahkan data konsumen
+CALL isi_konsumen('LSP04','Arina Wati','Jl. Belimbing 3','P','Semarang');
+CALL isi_konsumen('LSP05','Joko Suyono','Jl. Parkit 5','L','Salatiga');
+
+// Backup Restore
+- Backup
+mysqldump -u username -p nama_database > nama_file_dump.sql
+
+- Restore
+mysql -u username -p nama_database < nama_file_dump.sql
+
+
+KIRIM EMAIL :
+Subject = Tugas BK 2023
+ramadhan_rs@dsn.dinus.ac.id
